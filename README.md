@@ -10,6 +10,7 @@ no machine-learning training or forecasting to find one, and every finding carri
 evidence needed to reproduce it.
 
 ![EII Cloud chart](docs/eii_cloud_reference.png)
+![EII Cloud chart](https://raw.githubusercontent.com/michaelkhany/EII_cloud-Package/main/docs/eii_cloud_reference.png)
 
 ## Install
 
