@@ -15,8 +15,7 @@ import matplotlib.pyplot as plt
 import eii_cloud as eii
 from eii_cloud.evidence.graph import EvidenceGraph
 from eii_cloud.experiments import make_reference_scenario
-from eii_cloud.visualization import (DetectorComparisonChart, EventSequenceChart, EvidenceGraphChart,
-                                     MissingnessTimeline)
+from eii_cloud.visualization import DetectorComparisonChart, EventSequenceChart, EvidenceGraphChart, MissingnessTimeline
 
 out = Path(sys.argv[1] if len(sys.argv) > 1 else "reference_chart_out")
 sc = make_reference_scenario(seed=0)
