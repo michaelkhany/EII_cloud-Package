@@ -1,0 +1,18 @@
+# eii-cloud run examples/configs/reference_experiment.yaml --out runs/reference
+name: reference_experiment
+dataset:
+  synthetic: {scenario: reference, seed: 0, n: 100}
+# envelopes / context / reference default to the scenario's own definitions when omitted
+detectors:
+  - {type: threshold, parameter: gpu_temp, envelope: gpu_temp_static, detector_id: "threshold:gpu_temp"}
+  - {type: missingness, parameter: gpu_temp, detector_id: "missing:gpu_temp"}
+  - {type: flatline, parameter: gpu_temp, min_run: 8, tolerance: 0.0, detector_id: "flatline:gpu_temp"}
+  - {type: context_contradiction, parameter: gpu_temp, detector_id: "context:gpu_temp"}
+  - {type: ewma, parameter: gpu_temp, lam: 0.2, L: 3.0, detector_id: "ewma:gpu_temp"}
+  - {type: cusum, parameter: gpu_temp, k: 0.5, h: 5.0, detector_id: "cusum:gpu_temp"}
+rules: examples/rules/gpu_instability.yaml
+charts:
+  - {parameter: gpu_temp, envelope: gpu_temp_static, modes: [annotated, clean, flags_only]}
+export:
+  formats: [svg, pdf, tiff, png]
+  dpi: 300

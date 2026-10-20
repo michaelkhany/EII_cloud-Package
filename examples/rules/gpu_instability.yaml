@@ -1,0 +1,68 @@
+# Example composite-evidence rules for a GPU node (section 5.2 of the specification).
+# Loaded with yaml.safe_load; the vocabulary is closed, nothing is executed.
+schema_version: "1.0"
+name: gpu_instability_rules
+rules:
+  - id: sustained_high_load
+    category: composite_evidence
+    severity: info
+    enabled: false                     # helper rule: evaluated, referenced by others, no findings
+    expression:
+      persists_for:
+        condition: {signal: gpu_util, op: ">=", value: 85}
+        window: 3
+
+  - id: instability_under_load
+    category: composite_evidence
+    severity: critical
+    parameters: [gpu_temp, gpu_util]
+    description: |
+      Composite evidence:
+      Sustained high workload while the
+      workload-conditioned envelope is violated.
+
+      Question answered:
+      Is the GPU unstable under load? Yes.
+    expression:
+      and:
+        - rule: sustained_high_load
+        - outside_envelope: {parameter: gpu_temp, envelope: gpu_temp_ctx}
+
+  - id: deviation_then_gpu_error
+    category: composite_evidence
+    severity: high
+    parameters: [gpu_temp]
+    description: |
+      Composite evidence:
+      Temperature leaves its validity envelope
+      and a GPU error is logged within 12 windows.
+
+      Question answered:
+      Do deviation and error co-occur? Yes.
+    expression:
+      before:
+        condition: {outside_envelope: {parameter: gpu_temp, envelope: gpu_temp_static}}
+        next: {event: gpu_xid}
+        window: 12
+
+  - id: repeated_errors
+    category: temporal_instability
+    severity: high
+    expression:
+      count_within:
+        condition: {event: gpu_xid}
+        window: 50
+        min_count: 2
+
+  - id: error_without_telemetry
+    category: missing_when_expected
+    severity: medium
+    parameters: [gpu_temp]
+    description: |
+      Monitoring problem:
+      Telemetry is missing while the error log
+      is known to be silent.
+    expression:
+      and:
+        - missing_when_expected: gpu_temp
+        - not: {event: gpu_xid}        # UNKNOWN (no finding) while the log collector is down
